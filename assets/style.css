@@ -1,0 +1,47 @@
+
+  /* Fundo e texto principal */
+  /* --cor-fundo-escuro: #1E1E1E;
+  --cor-texto-neutro: #A9A9A9;
+  --cor-fundo-claro: #E0E0E0; */
+
+  /* Cores de destaque e detalhe */
+  /* --cor-naipe-vermelho: #C42B2B;
+  --cor-dourado-detalhe: #D9940A; */
+QWidget {
+  font-family: "Georgia";
+  font-weight: bold;
+}
+
+/* Seleciona todos os QPushButton */
+QPushButton {
+    background-color: #C42B2B; /* Cor de fundo verde */
+    color: white; /* Cor do texto */
+    border: 2px solid #000000;
+    border-radius: 4px; /* Bordas arredondadas */
+    padding: 10px 20px;
+    font-size: 14px;
+    letter-spacing: 1.2px;
+}
+
+QPushButton:disabled {
+  background-color: #af5b5b; /* Cor cinza da sua paleta */
+  color: #777777; /* Cor de texto mais escura para contraste */
+  border: 1px solid #555555;
+}
+
+/* Estado de hover: quando o mouse passa por cima do botão */
+QPushButton:hover {
+    background-color: #e04e4e;
+}
+
+/* Estado de pressionado: quando o botão é clicado */
+QPushButton:pressed {
+    background-color:#1E1E1E;
+}
+
+
+QLabel {
+    color: #D9940A;
+    font-size: 45px;
+    font-weight: bold;
+}
