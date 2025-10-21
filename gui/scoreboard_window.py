@@ -42,7 +42,6 @@ class ScoreboardWindow(QWidget):
         self.game_mode = game_mode
 
         # --- Conexão MQTT ---
-        # 1. Inicializa e conecta o cliente MQTT
         self.mqtt_client = MqttClient()
         self.mqtt_client.connect()
 
@@ -117,10 +116,18 @@ class ScoreboardWindow(QWidget):
         self.title_label = QLabel("Placar")
         self.title_label.setObjectName("title_label")
         
+        # --- Layout dos botões inferiores ---
         bottom_layout = QHBoxLayout()
+        self.new_game_button = QPushButton("Nova Partida")
+        self.new_game_button.setObjectName("newGameButton") # Para estilização
+        
         self.save_button = QPushButton("Finalizar Partida")
         self.save_button.setObjectName("saveButton")
-        bottom_layout.addWidget(self.save_button, alignment=QtCore.Qt.AlignCenter)
+        
+        bottom_layout.addStretch()
+        bottom_layout.addWidget(self.new_game_button)
+        bottom_layout.addWidget(self.save_button)
+        bottom_layout.addStretch()
 
         main_layout.addStretch()
         main_layout.addWidget(self.title_label, alignment=QtCore.Qt.AlignCenter)
@@ -134,16 +141,23 @@ class ScoreboardWindow(QWidget):
         self.team1_decrement_button.clicked.connect(self.decrement_team1_score)
         self.team2_increment_button.clicked.connect(self.increment_team2_score)
         self.team2_decrement_button.clicked.connect(self.decrement_team2_score)
-
-        # Define o estado inicial dos botões
-        # 2. Conecta o botão de finalizar ao novo método
+        
         self.save_button.clicked.connect(self.finish_match)
+        self.new_game_button.clicked.connect(self.start_new_match) # Conecta o novo botão
+
         self.update_button_states()
+
+    def start_new_match(self):
+        """Reinicia o placar para uma nova partida com as mesmas configurações."""
+        print("A iniciar nova partida...")
+        # Reutiliza a função setup_match com os dados atuais para reiniciar o jogo
+        self.setup_match(self.team1_name, self.team2_name, self.game_mode)
 
     def update_button_states(self):
         """Atualiza o estado dos botões com base no modo de jogo e placar."""
         if self.game_mode == 0:  # Modo Truco
-            if self.team1_score >= 12 or self.team2_score >= 12:
+            is_game_over = self.team1_score >= 12 or self.team2_score >= 12
+            if is_game_over:
                 self.team1_increment_button.setEnabled(False)
                 self.team2_increment_button.setEnabled(False)
                 self.save_button.setEnabled(True)
@@ -172,9 +186,12 @@ class ScoreboardWindow(QWidget):
         self.team2_score_label.setText(str(self.team2_score))
 
         # Garante que o estado dos botões seja reiniciado corretamente
+        self.save_button.setText("Finalizar Partida")
+        self.new_game_button.setEnabled(True)
         self.update_button_states()
 
     def increment_team1_score(self):
+        if self.game_mode == 0 and self.team1_score >= 12: return
         self.team1_score += 1
         self.team1_score_label.setText(str(self.team1_score))
         self.update_button_states()
@@ -186,6 +203,7 @@ class ScoreboardWindow(QWidget):
             self.update_button_states()
 
     def increment_team2_score(self):
+        if self.game_mode == 0 and self.team2_score >= 12: return
         self.team2_score += 1
         self.team2_score_label.setText(str(self.team2_score))
         self.update_button_states()
@@ -198,11 +216,12 @@ class ScoreboardWindow(QWidget):
     
     def finish_match(self):
         """
-        3. Reúne os dados da partida e publica via MQTT.
+        Reúne os dados da partida e publica via MQTT.
         """
         print("A finalizar a partida...")
         self.save_button.setText("A Enviar...")
         self.save_button.setEnabled(False)
+        self.new_game_button.setEnabled(False) # Desativa também o botão de nova partida
 
         match_data = {
             "team1_name": self.team1_name,
@@ -213,11 +232,15 @@ class ScoreboardWindow(QWidget):
         }
         
         # Publica os dados no tópico MQTT
-        self.mqtt_client.publish("scoreboard/match_results", match_data)
+        success = self.mqtt_client.publish("scoreboard/match_results", match_data)
 
-        # Opcional: Dar feedback ao utilizador e reativar o botão
-        # (Neste caso, pode ser melhor o botão "Voltar" fazer esta limpeza)
-        self.save_button.setText("Resultado Enviado!")
+        if success:
+            self.save_button.setText("Resultado Enviado!")
+            self.new_game_button.setEnabled(True) 
+        else:
+            self.save_button.setText("Erro ao Enviar")
+            self.save_button.setEnabled(True)
+            self.new_game_button.setEnabled(True) # Reativa se houver erro
 
     def closeEvent(self, event):
         """Garante que o cliente MQTT é desconectado ao fechar a janela."""
@@ -227,8 +250,6 @@ class ScoreboardWindow(QWidget):
 if __name__ == "__main__":
     # Bloco para permitir a execução direta do arquivo para testes
     app = QApplication(sys.argv)
-    # Teste com game_mode=0 (Truco)
     janela = ScoreboardWindow(team1_name="Nós", team2_name="Eles", game_mode=1)
     janela.show()
     sys.exit(app.exec())
-
