@@ -10,6 +10,9 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QFile, QTextStream
 
+# Assumindo que o mqtt_client.py está na pasta 'services'
+from services.mqtt_client import MqttClient 
+
 def load_stylesheet(filepath):
     """
     Função para ler um arquivo CSS e retornar seu conteúdo como uma string.
@@ -37,6 +40,11 @@ class ScoreboardWindow(QWidget):
         self.team2_score = 0
         self.resize(800,480)
         self.game_mode = game_mode
+
+        # --- Conexão MQTT ---
+        # 1. Inicializa e conecta o cliente MQTT
+        self.mqtt_client = MqttClient()
+        self.mqtt_client.connect()
 
         # Carrega a folha de estilos
         css_filepath = "./assets/style.css" 
@@ -128,6 +136,8 @@ class ScoreboardWindow(QWidget):
         self.team2_decrement_button.clicked.connect(self.decrement_team2_score)
 
         # Define o estado inicial dos botões
+        # 2. Conecta o botão de finalizar ao novo método
+        self.save_button.clicked.connect(self.finish_match)
         self.update_button_states()
 
     def update_button_states(self):
@@ -185,6 +195,34 @@ class ScoreboardWindow(QWidget):
             self.team2_score -= 1
             self.team2_score_label.setText(str(self.team2_score))
             self.update_button_states()
+    
+    def finish_match(self):
+        """
+        3. Reúne os dados da partida e publica via MQTT.
+        """
+        print("A finalizar a partida...")
+        self.save_button.setText("A Enviar...")
+        self.save_button.setEnabled(False)
+
+        match_data = {
+            "team1_name": self.team1_name,
+            "team1_score": self.team1_score,
+            "team2_name": self.team2_name,
+            "team2_score": self.team2_score,
+            "game_mode": "Truco" if self.game_mode == 0 else "Livre"
+        }
+        
+        # Publica os dados no tópico MQTT
+        self.mqtt_client.publish("scoreboard/match_results", match_data)
+
+        # Opcional: Dar feedback ao utilizador e reativar o botão
+        # (Neste caso, pode ser melhor o botão "Voltar" fazer esta limpeza)
+        self.save_button.setText("Resultado Enviado!")
+
+    def closeEvent(self, event):
+        """Garante que o cliente MQTT é desconectado ao fechar a janela."""
+        self.mqtt_client.disconnect()
+        event.accept()
 
 if __name__ == "__main__":
     # Bloco para permitir a execução direta do arquivo para testes
