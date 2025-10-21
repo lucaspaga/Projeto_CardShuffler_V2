@@ -40,6 +40,7 @@ class MinhaJanela(QWidget):
         self.title_label = QLabel("Embaralhador de Cartas")
         self.shuffle_button = QPushButton("Embaralhar")
         self.deal_button = QPushButton("Distribuir")
+        self.match_button = QPushButton("Assistente de Partida")
 
         # Suponha que você tenha um arquivo chamado 'logo.png'
         # no mesmo diretório.
@@ -56,6 +57,7 @@ class MinhaJanela(QWidget):
         # 3. Adicione os botões ao layout horizontal
         button_layout.addWidget(self.shuffle_button)
         button_layout.addWidget(self.deal_button)
+        button_layout.addWidget(self.match_button)
 
         # 4. Adicione os layouts e widgets ao layout principal (vertical)
         # O `addLayout()` é usado para colocar um layout DENTRO de outro.
