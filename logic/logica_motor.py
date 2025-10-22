@@ -1,31 +1,35 @@
+# logic/logica_motor.py
+
 from gpiozero import OutputDevice
 import time
 
-# As portas GPIO para o motor
-PIN_IN1 = 29
-PIN_IN2 = 31
+# As portas GPIO para o motor (USE A NUMERAÇÃO BCM)
+PIN_IN1 = 5  # (Antigo 29 BOARD)
+PIN_IN2 = 6  # (Antigo 31 BOARD)
 
 class Embaralhador:
     def __init__(self):
+        # ... (sem mudanças)
         self.motor_in1 = OutputDevice(PIN_IN1)
         self.motor_in2 = OutputDevice(PIN_IN2)
         self.parar_motor()
 
     def parar_motor(self):
+        # ... (sem mudanças)
         self.motor_in1.off()
         self.motor_in2.off()
         print("Motor parado.")
 
-    def girar_motor(self, tempo_segundos):
+    # ------ MUDANÇA AQUI ------
+    # Esta função agora só LIGA o motor e retorna imediatamente.
+    # Ela não usa mais time.sleep()
+    def girar_motor_start(self):
         """
-        Gira o motor pelo tempo especificado e depois o para.
-        O timer é gerenciado pela GUI, não por esta função.
+        Apenas LIGA o motor. O timer da GUI vai pará-lo.
         """
         self.motor_in1.on()
         self.motor_in2.off()
-        print(f"Motor girando por {tempo_segundos} segundos.")
+        print(f"Motor LIGADO.")
         
-        # O motor gira por todo o tempo, sem um loop de 1s
-        time.sleep(tempo_segundos)
-
-        self.parar_motor()
+    # A função antiga 'girar_motor' não é mais necessária
+    # ou pode ser removida.

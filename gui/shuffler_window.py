@@ -31,8 +31,6 @@ class GameModeWidget(QWidget):
         self.tempo_restante = self.modos_tempos[self.modos[self.indice_atual]]
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.atualizar_timer)
-
-        # 1. Adiciona a instância do motor
         self.motor = Embaralhador()
 
         css_filepath = "./assets/style.css" 
@@ -132,9 +130,7 @@ class GameModeWidget(QWidget):
         self.botao_incremento.setEnabled(False)
         self.back_button.setEnabled(False)
 
-        tempo_total = self.modos_tempos[palavra_atual]
-        motor_thread = threading.Thread(target=self.motor.girar_motor, args=(tempo_total,))
-        motor_thread.start()
+        self.motor.girar_motor_start()
 
     def atualizar_timer(self):
         self.tempo_restante -= 1
@@ -142,6 +138,7 @@ class GameModeWidget(QWidget):
 
         if self.tempo_restante <= 0:
             self.timer.stop()
+            self.motor.parar_motor()
             self.display_timer.setText("Tempo Esgotado!")
             self.shuffle_button.setEnabled(True)
             self.botao_decremento.setEnabled(True)
