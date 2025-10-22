@@ -2,8 +2,8 @@ from gpiozero import OutputDevice
 import time
 
 # As portas GPIO para o motor
-PIN_IN1 = 0
-PIN_IN2 = 1
+PIN_IN1 = 29
+PIN_IN2 = 31
 
 class Embaralhador:
     def __init__(self):

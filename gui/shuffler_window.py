@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtCore import QFile, QTextStream
 
 # Importa a classe da lógica do motor
-# from logic.logica_motor import Embaralhador
+from logic.logica_motor import Embaralhador
 
 def load_stylesheet(filepath):
     stylesheet_file = QFile(filepath)
@@ -33,7 +33,7 @@ class GameModeWidget(QWidget):
         self.timer.timeout.connect(self.atualizar_timer)
 
         # 1. Adiciona a instância do motor
-        # self.motor = Embaralhador()
+        self.motor = Embaralhador()
 
         css_filepath = "./assets/style.css" 
         stylesheet_content = load_stylesheet(css_filepath)
@@ -132,9 +132,9 @@ class GameModeWidget(QWidget):
         self.botao_incremento.setEnabled(False)
         self.back_button.setEnabled(False)
 
-        # tempo_total = self.modos_tempos[palavra_atual]
-        # motor_thread = threading.Thread(target=self.motor.girar_motor, args=(tempo_total,))
-        # motor_thread.start()
+        tempo_total = self.modos_tempos[palavra_atual]
+        motor_thread = threading.Thread(target=self.motor.girar_motor, args=(tempo_total,))
+        motor_thread.start()
 
     def atualizar_timer(self):
         self.tempo_restante -= 1
