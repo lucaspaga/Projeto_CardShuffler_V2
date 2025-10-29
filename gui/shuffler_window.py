@@ -4,7 +4,6 @@ from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtCore import QFile, QTextStream
 
-# Importa a classe da lógica do motor
 from logic.logica_motor import Embaralhador
 
 def load_stylesheet(filepath):
@@ -43,12 +42,10 @@ class GameModeWidget(QWidget):
     def init_ui(self):
         main_layout = QVBoxLayout(self)
 
-        # 1. Layout para o botão de voltar no canto superior esquerdo
         top_layout = QHBoxLayout()
         self.back_button = QPushButton("Voltar")
         top_layout.addWidget(self.back_button, alignment=Qt.AlignLeft | Qt.AlignTop)
-        top_layout.addStretch()  # Empurra o botão para a esquerda
-
+        top_layout.addStretch() 
         main_layout.addLayout(top_layout)
         
         self.title_label = QLabel("Modo de jogo: ")
@@ -146,8 +143,6 @@ class GameModeWidget(QWidget):
             self.back_button.setEnabled(True)   
 
 if __name__ == "__main__":
-    # Este bloco permite que você execute o arquivo
-    # diretamente para testar a janela
     app = QApplication(sys.argv)
     janela = GameModeWidget()
     janela.show()

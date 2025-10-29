@@ -10,13 +10,9 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QFile, QTextStream
 
-# Assumindo que o mqtt_client.py está na pasta 'services'
 from services.mqtt_client import MqttClient 
 
 def load_stylesheet(filepath):
-    """
-    Função para ler um arquivo CSS e retornar seu conteúdo como uma string.
-    """
     stylesheet_file = QFile(filepath)
     if not stylesheet_file.open(QFile.ReadOnly | QFile.Text):
         print(f"Erro: Não foi possível abrir o arquivo {filepath}")
@@ -27,10 +23,6 @@ def load_stylesheet(filepath):
     return stylesheet
 
 class ScoreboardWindow(QWidget):
-    """
-    Janela que exibe o placar da partida, com controles
-    para incrementar e decrementar a pontuação.
-    """
     def __init__(self, team1_name="Equipe 1", team2_name="Equipe 2", game_mode=1, parent=None):
         super().__init__(parent)
         
@@ -41,11 +33,9 @@ class ScoreboardWindow(QWidget):
         self.resize(800,480)
         self.game_mode = game_mode
 
-        # --- Conexão MQTT ---
         self.mqtt_client = MqttClient()
         self.mqtt_client.connect()
 
-        # Carrega a folha de estilos
         css_filepath = "./assets/style.css" 
         stylesheet_content = load_stylesheet(css_filepath)
         self.setStyleSheet(stylesheet_content)
@@ -54,12 +44,8 @@ class ScoreboardWindow(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        """
-        Inicializa e organiza os componentes da interface gráfica.
-        """
         main_layout = QVBoxLayout(self)
 
-        # Layout superior para o botão de voltar
         top_layout = QHBoxLayout()
         self.back_button = QPushButton("Voltar")
         self.back_button.setObjectName("backButton")
@@ -69,7 +55,6 @@ class ScoreboardWindow(QWidget):
 
         scores_layout = QHBoxLayout()
 
-        # --- Coluna da Equipe 1 ---
         team1_layout = QVBoxLayout()
         self.team1_name_label = QLabel(self.team1_name)
         self.team1_name_label.setObjectName("teamNameLabel")
@@ -87,7 +72,6 @@ class ScoreboardWindow(QWidget):
         team1_layout.addWidget(self.team1_score_label, alignment=QtCore.Qt.AlignCenter)
         team1_layout.addLayout(team1_buttons_layout)
 
-        # --- Coluna da Equipe 2 ---
         team2_layout = QVBoxLayout()
         self.team2_name_label = QLabel(self.team2_name)
         self.team2_name_label.setObjectName("teamNameLabel")
@@ -105,21 +89,18 @@ class ScoreboardWindow(QWidget):
         team2_layout.addWidget(self.team2_score_label, alignment=QtCore.Qt.AlignCenter)
         team2_layout.addLayout(team2_buttons_layout)
         
-        # --- Adiciona as colunas ao layout de placares ---
         scores_layout.addLayout(team1_layout)
         separator = QLabel("|") 
         separator.setObjectName("separatorLabel")
         scores_layout.addWidget(separator, alignment=QtCore.Qt.AlignCenter)
         scores_layout.addLayout(team2_layout)
 
-        # --- Montagem do Layout Principal ---
         self.title_label = QLabel("Placar")
         self.title_label.setObjectName("title_label")
         
-        # --- Layout dos botões inferiores ---
         bottom_layout = QHBoxLayout()
         self.new_game_button = QPushButton("Nova Partida")
-        self.new_game_button.setObjectName("newGameButton") # Para estilização
+        self.new_game_button.setObjectName("newGameButton")
         
         self.save_button = QPushButton("Finalizar Partida")
         self.save_button.setObjectName("saveButton")
@@ -136,26 +117,23 @@ class ScoreboardWindow(QWidget):
         main_layout.addLayout(bottom_layout)
         main_layout.addStretch()
 
-        # --- Conectar Sinais aos Slots ---
+
         self.team1_increment_button.clicked.connect(self.increment_team1_score)
         self.team1_decrement_button.clicked.connect(self.decrement_team1_score)
         self.team2_increment_button.clicked.connect(self.increment_team2_score)
         self.team2_decrement_button.clicked.connect(self.decrement_team2_score)
         
         self.save_button.clicked.connect(self.finish_match)
-        self.new_game_button.clicked.connect(self.start_new_match) # Conecta o novo botão
+        self.new_game_button.clicked.connect(self.start_new_match)
 
         self.update_button_states()
 
     def start_new_match(self):
-        """Reinicia o placar para uma nova partida com as mesmas configurações."""
         print("A iniciar nova partida...")
-        # Reutiliza a função setup_match com os dados atuais para reiniciar o jogo
         self.setup_match(self.team1_name, self.team2_name, self.game_mode)
 
     def update_button_states(self):
-        """Atualiza o estado dos botões com base no modo de jogo e placar."""
-        if self.game_mode == 0:  # Modo Truco
+        if self.game_mode == 0:
             is_game_over = self.team1_score >= 12 or self.team2_score >= 12
             if is_game_over:
                 self.team1_increment_button.setEnabled(False)
@@ -165,13 +143,12 @@ class ScoreboardWindow(QWidget):
                 self.team1_increment_button.setEnabled(True)
                 self.team2_increment_button.setEnabled(True)
                 self.save_button.setEnabled(False)
-        else:  # Modo Livre (game_mode == 1)
+        else:
             self.save_button.setEnabled(True)
             self.team1_increment_button.setEnabled(True)
             self.team2_increment_button.setEnabled(True)
 
     def setup_match(self, team1_name, team2_name, game_mode):
-        """Configura ou reinicia a partida com novos nomes e placar zerado."""
         self.game_mode = game_mode
         self.team1_name = team1_name if team1_name else "Equipe 1"
         self.team2_name = team2_name if team2_name else "Equipe 2"
@@ -185,7 +162,6 @@ class ScoreboardWindow(QWidget):
         self.team1_score_label.setText(str(self.team1_score))
         self.team2_score_label.setText(str(self.team2_score))
 
-        # Garante que o estado dos botões seja reiniciado corretamente
         self.save_button.setText("Finalizar Partida")
         self.new_game_button.setEnabled(True)
         self.update_button_states()
@@ -215,13 +191,10 @@ class ScoreboardWindow(QWidget):
             self.update_button_states()
     
     def finish_match(self):
-        """
-        Reúne os dados da partida e publica via MQTT.
-        """
         print("A finalizar a partida...")
         self.save_button.setText("A Enviar...")
         self.save_button.setEnabled(False)
-        self.new_game_button.setEnabled(False) # Desativa também o botão de nova partida
+        self.new_game_button.setEnabled(False)
 
         match_data = {
             "team1_name": self.team1_name,
@@ -231,7 +204,6 @@ class ScoreboardWindow(QWidget):
             "game_mode": "Truco" if self.game_mode == 0 else "Livre"
         }
         
-        # Publica os dados no tópico MQTT
         success = self.mqtt_client.publish("scoreboard/match_results", match_data)
 
         if success:
@@ -240,15 +212,13 @@ class ScoreboardWindow(QWidget):
         else:
             self.save_button.setText("Erro ao Enviar")
             self.save_button.setEnabled(True)
-            self.new_game_button.setEnabled(True) # Reativa se houver erro
+            self.new_game_button.setEnabled(True)
 
     def closeEvent(self, event):
-        """Garante que o cliente MQTT é desconectado ao fechar a janela."""
         self.mqtt_client.disconnect()
         event.accept()
 
 if __name__ == "__main__":
-    # Bloco para permitir a execução direta do arquivo para testes
     app = QApplication(sys.argv)
     janela = ScoreboardWindow(team1_name="Nós", team2_name="Eles", game_mode=1)
     janela.show()

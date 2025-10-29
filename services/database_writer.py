@@ -6,20 +6,14 @@ import psycopg2
 from dotenv import load_dotenv
 
 def start_database_service():
-    """
-    Função principal que configura e inicia o cliente MQTT para escutar
-    e guardar os dados na base de dados.
-    """
     load_dotenv()
 
-    # --- Configurações ---
     MQTT_BROKER = "broker.hivemq.com"
     MQTT_PORT = 1883
     MQTT_TOPIC = "scoreboard/match_results"
     DATABASE_URL = os.getenv("DATABASE_URL")
 
     def save_to_database(match_data):
-        """Conecta à base de dados PostgreSQL e insere os dados da partida."""
         print("[DB Service] A guardar dados da partida...")
         conn = None
         try:
@@ -61,7 +55,7 @@ def start_database_service():
 
     if not DATABASE_URL:
         print("[DB Service] ERRO CRÍTICO: Variável de ambiente DATABASE_URL não encontrada.")
-        return # Sai da função se a URL não estiver definida
+        return 
         
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect
@@ -73,5 +67,4 @@ def start_database_service():
         print(f"[DB Service] !!! ERRO CRÍTICO ao conectar ao broker MQTT: {e}")
         return
 
-    # Este laço mantém o serviço a escutar em segundo plano
     client.loop_forever()
